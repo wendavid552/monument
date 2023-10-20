@@ -6,7 +6,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
-const val MC_VERSIONS_GITHUB = "ssh://git@github.com/skyrising/mc-versions.git"
+const val MC_VERSIONS_GITHUB = "https://github.com/skyrising/mc-versions.git"
 val MC_VERSIONS_CACHE_DIR: Path = CACHE_DIR.resolve("mc-versions")
 val MC_VERSIONS_DATA_DIR: Path = MC_VERSIONS_CACHE_DIR.resolve("data")
 
