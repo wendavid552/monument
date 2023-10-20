@@ -33,6 +33,9 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
+val executorForMerge: CustomThreadPoolExecutor = CustomThreadPoolExecutor(minOf(INITIAL_MAX_THREADS, MAX_THREADS + 4))
+fun <T> supplyAsyncForMerge(supplier: () -> T): CompletableFuture<T> = CompletableFuture.supplyAsync({ supplier() }, { executorForMerge.execute(it) })
+
 fun mergeJars(version: String, client: Path, server: Path, merged: Path) = supplyAsync {
     Files.createDirectories(merged.parent)
     JarMerger(client, server, merged).use { merger ->
@@ -117,12 +120,12 @@ class JarMerger(inputClient: Path, inputServer: Path, output: Path) :
 
     @Throws(IOException::class)
     fun merge() {
-        val service = threadLocalContext.get().executor
+        val service = executorForMerge
         try {
             val listener = progressListener
             listener?.init(0, "Reading JAR entries")
-            val cFuture = supplyAsync { readToMap(inputClient) }
-            val sFuture = supplyAsync { readToMap(inputServer) }
+            val cFuture = supplyAsyncForMerge { readToMap(inputClient) }
+            val sFuture = supplyAsyncForMerge { readToMap(inputServer) }
             CompletableFuture.allOf(cFuture, sFuture).join()
             entriesClient = cFuture.get()
             entriesServer = sFuture.get()

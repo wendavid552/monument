@@ -129,6 +129,7 @@ fun main(args: Array<String>) {
         update(branch, action, recommitFrom, manifest)
     } finally {
         threadLocalContext.get().executor.shutdownNow()
+        executorForMerge.shutdownNow()
     }
 }
 
