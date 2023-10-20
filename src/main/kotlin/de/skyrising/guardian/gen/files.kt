@@ -2,6 +2,7 @@ package de.skyrising.guardian.gen
 
 import com.google.gson.JsonElement
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -347,7 +348,7 @@ fun extractGradleAndExtraSources(version: VersionInfo, out: Path): CompletableFu
 
 fun getMonumentClassRoot(): Path? {
     val dummyClass = Dummy::class.java
-    val dummyFileName = "/" + dummyClass.name.replace('.', '/') + ".class"
+    val dummyFileName = File.separator + dummyClass.name.replace('.', File.separatorChar) + ".class"
     val dummyUrl = dummyClass.getResource(dummyFileName)
         ?: return null
     val uri = dummyUrl.toURI()
