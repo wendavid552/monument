@@ -191,6 +191,7 @@ private data class Dependency(val dependency: String, val type: String = "implem
 
 fun generateGradleBuild(version: VersionInfo, dir: Path): CompletableFuture<Unit> = getMojangVersionManifest(version).thenApply {
     generateGradleBuild(it, dir)
+    generateWorkspaceFiles(dir)
 }
 
 fun generateGradleBuild(manifest: JsonObject, dir: Path) {
@@ -265,6 +266,17 @@ fun generateGradleBuild(manifest: JsonObject, dir: Path) {
     }
     PrintWriter(Files.newBufferedWriter(dir.resolve("settings.gradle"), StandardCharsets.UTF_8)).use { out ->
         out.println("rootProject.name = 'minecraft'")
+    }
+}
+
+fun generateWorkspaceFiles(dir: Path) {
+    PrintWriter(Files.newBufferedWriter(dir.resolve(".gitignore"), StandardCharsets.UTF_8)).use { out ->
+        out.println("/.idea/")
+        out.println("/.vscode/")
+        out.println("/.gradle/")
+        out.println("/build/")
+        out.println("/out/")
+        out.println("/logs/")
     }
 }
 
