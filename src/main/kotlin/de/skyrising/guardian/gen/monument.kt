@@ -68,6 +68,7 @@ fun main(args: Array<String>) {
         recording.isToDisk = true
         recording.name = "monument-$dateString"
         recording.destination = Path.of("logs", "monument-$dateString.jfr")
+        recording.maxSize = 1L shl 30  // 1GiB
         recording.start()
     }
     val parser = OptionParser()
