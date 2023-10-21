@@ -331,7 +331,7 @@ fun getSourcePath(version: String, mappings: MappingProvider, decompiler: Decomp
 
 fun getMappedMergedJar(version: VersionInfo, provider: MappingProvider): CompletableFuture<Path> {
     val mappedJarPath = getMappedJarOutput(provider.name, JARS_MERGED_DIR.resolve("${version.id}.jar"))
-    if (Files.exists(mappedJarPath)) return CompletableFuture.completedFuture(mappedJarPath)
+    if (Files.exists(mappedJarPath) && isJarGood(mappedJarPath)) return CompletableFuture.completedFuture(mappedJarPath)
     val jar = getJar(version, MappingTarget.MERGED)
     val mappings = getMappings(provider, version, MappingTarget.MERGED)
     return CompletableFuture.allOf(jar, mappings).thenCompose {

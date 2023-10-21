@@ -8,6 +8,7 @@ import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.time.ZonedDateTime
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -147,7 +148,7 @@ fun getJar(version: VersionInfo, target: MappingTarget): CompletableFuture<Path>
         val merged = JARS_MERGED_DIR.resolve("$id.jar")
         val ip = inProgress[merged]
         if (ip != null) return ip
-        if (Files.exists(merged)) return CompletableFuture.completedFuture(merged)
+        if (Files.exists(merged) && isJarGood(merged)) return CompletableFuture.completedFuture(merged)
         val client = getJar(version, MappingTarget.CLIENT)
         val server = getJar(version, MappingTarget.SERVER)
         return deduplicate(inProgress, merged, CompletableFuture.allOf(client, server).thenCompose {
@@ -160,14 +161,14 @@ fun getJar(version: VersionInfo, target: MappingTarget): CompletableFuture<Path>
     val path = dir.resolve("$id.jar")
     val ip = inProgress[path]
     if (ip != null) return ip
-    if (Files.exists(path)) return CompletableFuture.completedFuture(getRealJar(version, path, target))
+    if (Files.exists(path) && isJarGood(path)) return CompletableFuture.completedFuture(getRealJar(version, path, target))
     return deduplicate(inProgress, path, downloadFile(version, target.id, path).thenApply { getRealJar(version, path, target) })
 }
 
 fun getRealJar(version: VersionInfo, jar: Path, target: MappingTarget): Path {
     if (target != MappingTarget.SERVER) return jar
     val realPath = jar.resolveSibling("server-${version.id}.jar")
-    if (Files.exists(realPath)) return realPath
+    if (Files.exists(realPath) && isJarGood(realPath)) return realPath
     val fs = getJarFileSystem(jar)
     val versionListFile = fs.getPath("META-INF/versions.list")
     if (!Files.exists(versionListFile)) {
@@ -179,7 +180,7 @@ fun getRealJar(version: VersionInfo, jar: Path, target: MappingTarget): Path {
         val parts = file.split('\t')
         if (parts[1] == version.id || files.size == 1) {
             val archivedPath = fs.getPath("META-INF/versions", parts[2])
-            Files.copy(archivedPath, realPath)
+            Files.copy(archivedPath, realPath, StandardCopyOption.REPLACE_EXISTING)
             return realPath
         }
     }

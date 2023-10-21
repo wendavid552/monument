@@ -12,6 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.security.MessageDigest
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.zip.ZipFile
 
 data class DownloadProgress(val length: Long, val progress: Long)
 
@@ -22,7 +23,6 @@ fun download(url: URI, file: Path, listener: ((DownloadProgress) -> Unit)? = nul
 }
 
 private fun startDownload(url: URI, file: Path, listener: ((DownloadProgress) -> Unit)? = null) = supplyAsync {
-    if (Files.exists(file)) return@supplyAsync
     println("Downloading $url")
     Files.createDirectories(file.parent)
     if (url.scheme == "file") {
@@ -359,5 +359,19 @@ fun getMonumentClassRoot(): Path? {
         }
         "jar" -> Paths.get(uri.schemeSpecificPart.substring(5, uri.schemeSpecificPart.indexOf('!')))
         else -> null
+    }
+}
+
+fun isJarGood(jarPath: Path): Boolean {
+    return try {
+        ZipFile(jarPath.toFile()).use { zip ->
+            for (entry in zip.entries()) {
+                zip.getInputStream(entry).use { }
+            }
+        }
+        true
+    } catch (e: Exception) {
+        output("jarVerifier", "bad jar at $jarPath")
+        false
     }
 }
