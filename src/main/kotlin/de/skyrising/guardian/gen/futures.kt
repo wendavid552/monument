@@ -96,7 +96,7 @@ class CustomThreadPoolExecutor(val parallelism: Int, initialDecompileParallelism
             if (diff == 0) return
             if (diff > 0) decompileSemaphore.release(diff)
             else decompileSemaphore.acquireUninterruptibly(-diff)
-            println("Decompile parallelism is now $value")
+            output("scheduler", "Decompile parallelism is now $value")
             field = value
         }
     private val decompileSemaphore = Semaphore(decompileParallelism)
@@ -109,6 +109,8 @@ class CustomThreadPoolExecutor(val parallelism: Int, initialDecompileParallelism
     private var running = true
 
     init {
+        output("scheduler", "parallelism: $parallelism")
+        output("scheduler", "decompileParallelism: $decompileParallelism")
         for (worker in workers) worker.thread.start()
     }
 

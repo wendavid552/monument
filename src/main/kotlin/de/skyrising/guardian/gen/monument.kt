@@ -47,7 +47,7 @@ val CACHE_DIR: Path = Path.of(System.getenv("MONUMENT_CACHE") ?: ".cache")
 val RESOURCE_CACHE_DIR: Path = CACHE_DIR.resolve("resources")
 val JARS_DIR: Path = CACHE_DIR.resolve("jars")
 
-val INITIAL_MAX_THREADS = maxOf(Runtime.getRuntime().availableProcessors() - 2, 1)
+val INITIAL_MAX_THREADS = maxOf(Runtime.getRuntime().availableProcessors(), 1)
 var MAX_THREADS = INITIAL_MAX_THREADS
 
 private val UNICODE_PROGRESS_BLOCKS = charArrayOf(' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█')
