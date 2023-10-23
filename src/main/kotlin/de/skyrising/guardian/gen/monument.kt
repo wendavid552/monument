@@ -239,6 +239,7 @@ fun update(branch: String, action: String, recommitFrom: String?, manifest: Path
         }
         val all = CompletableFuture.allOf(*futures.toTypedArray())
         sysOut.println("Waiting for sources to generate")
+        val progressStartTime = System.currentTimeMillis()
         var lines = 0
         fun printStatus(full: Boolean) {
             val listedOutputs = sortedSetOf<String>()
@@ -265,10 +266,12 @@ fun update(branch: String, action: String, recommitFrom: String?, manifest: Path
                 doneTasks += unit.totalDone
             }
             val fraction = if (totalTasks == 0) 0.0 else doneTasks.toDouble() / totalTasks
+            val etaMin = if (fraction == 0.0) -1 else (System.currentTimeMillis() - progressStartTime) / 1000.0 / 60.0 / fraction * (1 - fraction)
             val terminalWidth = TERMINAL.width
             val progress = StringBuilder("Progress: ")
             progress.append(doneUnits).append('/').append(totalUnits).append(", ")
-            progress.append(doneTasks).append('/').append(totalTasks).append(" tasks ")
+            progress.append(doneTasks).append('/').append(totalTasks).append(" tasks, ")
+            progress.append("eta: ").append(String.format("%.2f", etaMin)).append("min ")
             if (totalTasks > missing.size * 4) {
                 val progressBarWidth = terminalWidth - progress.length - 10
                 progress.append("\u001b[100m")
